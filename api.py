@@ -1,0 +1,111 @@
+import requests
+import os
+import sys
+import json
+import math
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+if not os.getenv("API_KEY"):
+    sys.exit("API_KEY is not set in .env")
+
+HEADERS = {
+    "accept": "application/json",
+    "API-Key": os.getenv("API_KEY"),
+}
+
+BIRD_LIST_URI = "https://nuthatch.lastelm.software/v2/birds"
+BIRD_URI = "https://nuthatch.lastelm.software/birds/"
+SUCCESS_STATUS_CODE = 200
+
+
+def fetch_all_birds():
+    params = {"page": 1, "pageSize": 25, "hasImg": "true"}
+    response = fetch_birds_with_images(params)
+    response.raise_for_status()
+
+    if response.status_code == SUCCESS_STATUS_CODE:
+        data = response.json()
+        all_birds = map_birds(data["entities"])
+
+        page_size = data["pageSize"]
+        total_entities = data["total"]
+
+        if total_entities > page_size:
+            total_pages = math.ceil(total_entities / page_size)
+
+            for page in range(2, total_pages + 1):
+                params = {"page": page, "pageSize": 25, "hasImg": "true"}
+                response = fetch_birds_with_images(params)
+                response.raise_for_status()
+                all_birds.extend(map_birds(response.json()["entities"]))
+
+        return all_birds
+
+
+def map_birds(raw_birds):
+    results = []
+
+    for bird in raw_birds:
+        bird_data = {
+            "id":         bird["id"],
+            "name":       bird["name"],
+            "images":     json.dumps(bird["images"]),
+            "length_min": bird.get("lengthMin"),
+            "length_max": bird.get("lengthMax"),
+            "sci_name":   bird.get("sciName"),
+            "family":     bird.get("family"),
+            "order_name": bird.get("order"),
+            "status":     bird.get("status"),
+            "region":     json.dumps(bird.get("region")),
+        }
+
+        results.append(bird_data)
+
+    return results
+
+
+def fetch_birds_with_images(params):
+    return requests.get(url=BIRD_LIST_URI, params=params, headers=HEADERS, timeout=10)
+
+
+def fetch_bird_recordings(bird_id):
+    response = requests.get(url=f"{BIRD_URI}{bird_id}", headers=HEADERS, timeout=10)
+    response.raise_for_status()
+
+    if response.status_code == SUCCESS_STATUS_CODE:
+        data = response.json()
+        all_recordings = map_recordings(data["recordings"])
+        return all_recordings
+
+
+def map_recordings(raw_recordings):
+    result = []
+
+    for record in raw_recordings:
+        records_data = {
+            "id":             int(record.get("id")),
+            "bird_id":        record.get("birdId"),
+            "date":           record.get("date"),
+            "location":       record.get("loc"),
+            "licence":        record.get("lic"),
+            "type":           record.get("type"),
+            "recorder":       record.get("rec"),
+            "remarks":        record.get("rmk"),
+            "file_url":       record.get("file"),
+            "uploaded_date":  record.get("uploaded"),
+            "latitude":       record.get("lat"),
+            "longitude":      record.get("lng"),
+            "record_length":  record.get("length"),
+            "sonogram":       json.dumps(record.get("sono")),
+            "xeno_canto_url": record.get("url"),
+            "quality":        record.get("q"),
+            "time":           record.get("time"),
+            "country":        record.get("cnt"),
+        }
+
+        result.append(records_data)
+
+    return result
