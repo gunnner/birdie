@@ -4,32 +4,24 @@ import requests
 
 import database
 import api
+import search
 
 from rich.panel import Panel
-from rich.console import Console
 from rich.table import Table
-
-ERROR_MESSAGES = {
-    "http_error": "Something going wrong",
-    "connection_error": "Something going wrong with internet connection",
-    "json_error": "Failed to parse JSON.",
-}
-
-console = Console()
+from console import console
+from constants import ERROR_MESSAGES
 
 
 def main():
     connection = database.create_connection()
     database.create_tables(connection)
     database.seed_birds(connection)
+    all_bird_names = database.get_bird_names(connection)
 
     while True:
         try:
-            bird_name = input("Enter a bird name: ").strip()
+            bird_name = search.find_bird(all_bird_names)
             bird = database.find_bird_by_name(connection, bird_name)
-            if not bird:
-                console.print("[blue]Bird not found. Try again.")
-                continue
 
             if not database.find_recordings_by_bird_id(connection, bird["id"]):
                 api_records = api.fetch_bird_recordings(bird["id"])
@@ -37,9 +29,8 @@ def main():
 
             best_recording = database.find_best_recording(connection, bird["id"])
             display_bird(bird, best_recording)
-            answer = input("Search for another bird? Yes/No: ").strip().lower()
 
-            if answer not in ("yes", "y"):
+            if not search.confirm_search_again():
                 break
         except requests.ConnectionError as err:
             sys.exit(f"{ERROR_MESSAGES["connection_error"]}: {err}")
@@ -47,8 +38,6 @@ def main():
             sys.exit(f"{ERROR_MESSAGES["http_error"]}: {err}")
         except json.JSONDecodeError:
             sys.exit(ERROR_MESSAGES["json_error"])
-        except IndexError:
-            console.print("[red]There are no birds with appropriate name. Try again.")
 
 
 def display_bird(bird, best_recording):
@@ -63,6 +52,14 @@ def display_bird(bird, best_recording):
     table.add_row("🌍 Region:", f"{", ".join(json.loads(bird["region"]))}")
     table.add_row("📏 Bird size:", f"{bird["length_min"]} - {bird["length_max"]} cm")
     table.add_row("📗 Protection status:", f"{bird["status"]}")
+
+    if best_recording:
+        table = add_recording_rows(table, best_recording)
+
+    console.print(Panel(table, title="🕊️ Bird Card"))
+
+
+def add_recording_rows(table, best_recording):
     table.add_row("[bold] Best Recording[/bold]", "")
     table.add_row("🎵 Audio:", f"{best_recording["file_url"]}")
     table.add_row("🎙 Recorded by:", f"{best_recording["recorder"]}")
@@ -70,8 +67,7 @@ def display_bird(bird, best_recording):
     table.add_row("📅 Date:", f"{best_recording["date"]}")
     table.add_row("⌛ Duration:", f"{best_recording["record_length"]}")
     table.add_row("🎶 Voice type:", f"{best_recording["type"].title()}")
-
-    console.print(Panel(table, title="🕊️ Bird Card"))
+    return table
 
 
 if __name__ == "__main__":

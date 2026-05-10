@@ -4,21 +4,7 @@ import sys
 import json
 import math
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
-if not os.getenv("API_KEY"):
-    sys.exit("API_KEY is not set in .env")
-
-HEADERS = {
-    "accept": "application/json",
-    "API-Key": os.getenv("API_KEY"),
-}
-
-BIRD_LIST_URI = "https://nuthatch.lastelm.software/v2/birds"
-BIRD_URI = "https://nuthatch.lastelm.software/birds/"
-SUCCESS_STATUS_CODE = 200
+from constants import HEADERS, BIRD_LIST_URI, BIRD_URI, SUCCESS_STATUS_CODE
 
 
 def fetch_all_birds():

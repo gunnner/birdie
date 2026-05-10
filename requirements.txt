@@ -7,3 +7,4 @@ python-dotenv
 pytest
 sqlite3
 rich
+InquirerPy
