@@ -133,9 +133,4 @@ def get_bird_names(connection):
     cursor.execute("SELECT name FROM birds WHERE name IS NOT NULL")
     result = cursor.fetchall()
 
-    # bird_names = []
-    # for bird in result:
-    #     bird_names.append(bird["name"])
-
-    # return bird_names
     return [bird["name"] for bird in result]
