@@ -80,6 +80,12 @@ The user can make a selection using the arrow keys on the keyboard. The subseque
 | `birdie.db` | SQLite database |
 | `requirements.txt` | Project dependencies |
 
+## Run tests
+
+```
+pytest test_project.py
+```
+
 ## Design Decisions
 
 **SQLite DataBase** — SQLite was chosen because the database is minimal (only two tables), requires no server setup, and is built into Python.
