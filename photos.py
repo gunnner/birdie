@@ -23,6 +23,8 @@ def download_images(bird_image_urls):
     images = []
     for image_url in bird_image_urls:
         response = requests.get(image_url)
+        response.raise_for_status()
+        
         binary_file = Image.open(io.BytesIO(response.content))
         images.append(binary_file)
     return images
