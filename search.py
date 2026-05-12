@@ -3,6 +3,7 @@ import sys
 
 from InquirerPy import inquirer
 from InquirerPy.base.control import Choice
+
 from console import console
 from constants import USER_CHOICES
 
@@ -27,12 +28,12 @@ def show_main_menu():
     action = inquirer.select(
         message="How would you like to find a bird?",
         choices=[
+            USER_CHOICES["random"],
             USER_CHOICES["by_name"],
             USER_CHOICES["all_birds"],
-            USER_CHOICES["random"],
             Choice(value=None, name="Exit"),
         ],
-        default=USER_CHOICES["by_name"],
+        default=USER_CHOICES["random"],
     ).execute()
 
     return action
@@ -60,8 +61,8 @@ def search_by_name(birds):
 
 def browse_all(birds):
     action = inquirer.fuzzy(
-        message="Browse birds:",
-        choices=birds,
+        message="Browse all birds:",
+        choices=sorted(birds),
         max_height="70%",
     ).execute()
 
@@ -73,4 +74,4 @@ def random_bird(birds):
 
 
 def confirm_search_again():
-    return inquirer.confirm(message="Search for another bird?").execute()
+    return inquirer.confirm(message="Search for another bird?", default=True).execute()

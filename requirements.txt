@@ -8,3 +8,11 @@ pytest
 sqlite3
 rich
 InquirerPy
+term-image
+PIL
+Pillow
+tempfile
+playsound3
+pytest-mock
+io
+random

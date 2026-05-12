@@ -1,10 +1,9 @@
-import requests
-import os
-import sys
 import json
 import math
 
-from constants import HEADERS, BIRD_LIST_URI, BIRD_URI, SUCCESS_STATUS_CODE
+import requests
+
+from constants import BIRD_LIST_URI, BIRD_URI, HEADERS, SUCCESS_STATUS_CODE
 
 
 def fetch_all_birds():
