@@ -103,3 +103,6 @@ pytest test_project.py
 **term-image for terminal rendering** — chosen to render photos directly in the terminal without opening a browser. The image height is calculated dynamically based on terminal size to prevent rendering errors on smaller windows.
 
 **PIL (Pillow) for photo stitching** — bird profiles contain multiple photos. Rather than displaying them one below another, Pillow is used to stitch them horizontally into a single image, providing a more compact and visually appealing presentation.
+
+**Type hints** — all functions across the project are annotated with type hints
+using Python's `typing` module. This improves code readability and allows static analysis with `mypy`.

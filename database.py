@@ -1,15 +1,16 @@
 import sqlite3
+from typing import Optional
 
 import api
 
 
-def create_connection():
+def create_connection() -> sqlite3.Connection:
     connection = sqlite3.connect("birdie.db")
     connection.row_factory = sqlite3.Row
     return connection
 
 
-def create_tables(connection):
+def create_tables(connection: sqlite3.Connection) -> None:
     connection.execute("""
         CREATE TABLE IF NOT EXISTS birds(
             id         INTEGER PRIMARY KEY,
@@ -51,7 +52,7 @@ def create_tables(connection):
     connection.commit()
 
 
-def seed_birds(connection):
+def seed_birds(connection: sqlite3.Connection) -> None:
     cursor = connection.cursor()
     cursor.execute("SELECT EXISTS(SELECT 1 FROM birds)")
 
@@ -60,7 +61,7 @@ def seed_birds(connection):
         insert_birds(connection, birds)
 
 
-def insert_birds(connection, data):
+def insert_birds(connection: sqlite3.Connection, data: list[dict]) -> None:
     cursor = connection.cursor()
     cursor.executemany(
         """
@@ -78,7 +79,7 @@ def insert_birds(connection, data):
     connection.commit()
 
 
-def insert_recordings(connection, recordings):
+def insert_recordings(connection: sqlite3.Connection, recordings: list[dict]) -> None:
     cursor = connection.cursor()
     cursor.executemany(
         """
@@ -98,19 +99,19 @@ def insert_recordings(connection, recordings):
     connection.commit()
 
 
-def find_bird_by_name(connection, bird_name):
+def find_bird_by_name(connection: sqlite3.Connection, bird_name: str) -> Optional[sqlite3.Row]:
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM birds WHERE name = ?", (bird_name,))
     return cursor.fetchone()
 
 
-def find_recordings_by_bird_id(connection, bird_id):
+def find_recordings_by_bird_id(connection: sqlite3.Connection, bird_id: int) -> list[sqlite3.Row]:
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM bird_recordings WHERE bird_id = ?", (bird_id,))
     return cursor.fetchall()
 
 
-def find_best_recording(connection, bird_id):
+def find_best_recording(connection: sqlite3.Connection, bird_id: int) -> Optional[sqlite3.Row]:
     cursor = connection.cursor()
     cursor.execute(
         """
@@ -129,7 +130,7 @@ def find_best_recording(connection, bird_id):
     return cursor.fetchone()
 
 
-def get_bird_names(connection):
+def get_bird_names(connection: sqlite3.Connection) -> list[str]:
     cursor = connection.cursor()
     cursor.execute("SELECT name FROM birds WHERE name IS NOT NULL")
     result = cursor.fetchall()

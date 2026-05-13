@@ -6,31 +6,30 @@ import requests
 from constants import BIRD_LIST_URI, BIRD_URI, HEADERS, SUCCESS_STATUS_CODE
 
 
-def fetch_all_birds():
+def fetch_all_birds() -> list[dict]:
     params = {"page": 1, "pageSize": 25, "hasImg": "true"}
     response = fetch_birds_with_images(params)
     response.raise_for_status()
 
-    if response.status_code == SUCCESS_STATUS_CODE:
-        data = response.json()
-        all_birds = map_birds(data["entities"])
+    data = response.json()
+    all_birds = map_birds(data["entities"])
 
-        page_size = data["pageSize"]
-        total_entities = data["total"]
+    page_size = data["pageSize"]
+    total_entities = data["total"]
 
-        if total_entities > page_size:
-            total_pages = math.ceil(total_entities / page_size)
+    if total_entities > page_size:
+        total_pages = math.ceil(total_entities / page_size)
 
-            for page in range(2, total_pages + 1):
-                params = {"page": page, "pageSize": 25, "hasImg": "true"}
-                response = fetch_birds_with_images(params)
-                response.raise_for_status()
-                all_birds.extend(map_birds(response.json()["entities"]))
+        for page in range(2, total_pages + 1):
+            params = {"page": page, "pageSize": 25, "hasImg": "true"}
+            response = fetch_birds_with_images(params)
+            response.raise_for_status()
+            all_birds.extend(map_birds(response.json()["entities"]))
 
-        return all_birds
+    return all_birds
 
 
-def map_birds(raw_birds):
+def map_birds(raw_birds: list[dict]) -> list[dict]:
     results = []
 
     for bird in raw_birds:
@@ -52,26 +51,24 @@ def map_birds(raw_birds):
     return results
 
 
-def fetch_birds_with_images(params):
+def fetch_birds_with_images(params: dict) -> requests.Response:
     return requests.get(url=BIRD_LIST_URI, params=params, headers=HEADERS, timeout=10)
 
 
-def fetch_bird_recordings(bird_id):
+def fetch_bird_recordings(bird_id: int) -> list[dict]:
     response = requests.get(url=f"{BIRD_URI}{bird_id}", headers=HEADERS, timeout=10)
     response.raise_for_status()
 
-    if response.status_code == SUCCESS_STATUS_CODE:
-        data = response.json()
-        all_recordings = map_recordings(data["recordings"])
-        return all_recordings
+    data = response.json()
+    return map_recordings(data["recordings"])
 
 
-def map_recordings(raw_recordings):
+def map_recordings(raw_recordings: list[dict]) -> list[dict]:
     result = []
 
     for record in raw_recordings:
         records_data = {
-            "id":             int(record.get("id")),
+            "id":             int(record["id"]),
             "bird_id":        record.get("birdId"),
             "date":           record.get("date"),
             "location":       record.get("loc"),

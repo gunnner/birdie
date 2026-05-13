@@ -1,16 +1,18 @@
 import io
 import json
 import os
+import sqlite3
 import tempfile
+from typing import Any
 
 import requests
 from PIL import Image
-from term_image.image import from_file
+from term_image.image import from_file  # type: ignore
 
 from console import console
 
 
-def display_photos(bird):
+def display_photos(bird: sqlite3.Row) -> None:
     with console.status("[cyan]Loading photos...[/cyan]", spinner="monkey"):
         bird_image_urls = json.loads(bird["images"])
         images = download_images(bird_image_urls)
@@ -19,18 +21,17 @@ def display_photos(bird):
     render_image(merged_image)
 
 
-def download_images(bird_image_urls):
+def download_images(bird_image_urls: list[str]) -> list[Any]:
     images = []
     for image_url in bird_image_urls:
         response = requests.get(image_url)
         response.raise_for_status()
-        
         binary_file = Image.open(io.BytesIO(response.content))
         images.append(binary_file)
     return images
 
 
-def merge_images(images):
+def merge_images(images: list[Any]) -> Any:
     min_height = min(img.height for img in images)
 
     resized = []
@@ -50,7 +51,7 @@ def merge_images(images):
     return merged_image
 
 
-def render_image(merged_image):
+def render_image(merged_image: Any) -> None:
     with tempfile.NamedTemporaryFile(delete_on_close=False) as fp:
         merged_image.save(fp, format="JPEG")
         fp.seek(0)
