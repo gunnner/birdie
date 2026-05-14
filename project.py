@@ -46,15 +46,13 @@ def fetch_bird_names(connection: sqlite3.Connection) -> list[str]:
 
 
 def load_bird(
-    connection: sqlite3.Connection, all_bird_names: list[str]
-) -> Optional[sqlite3.Row]:
+    connection: sqlite3.Connection, all_bird_names: list[str]) -> Optional[sqlite3.Row]:
     bird_name = search.find_bird(all_bird_names)
     return database.find_bird_by_name(connection, bird_name)
 
 
 def load_best_recording(
-    connection: sqlite3.Connection, bird: sqlite3.Row
-) -> Optional[sqlite3.Row]:
+    connection: sqlite3.Connection, bird: sqlite3.Row) -> Optional[sqlite3.Row]:
     if not database.find_recordings_by_bird_id(connection, bird["id"]):
         api_records = api.fetch_bird_recordings(bird["id"])
         database.insert_recordings(connection, api_records)

@@ -65,4 +65,3 @@ def render_image(merged_image: Any) -> None:
             image.draw(pad_height=1)
         except Exception:
             console.print("[green] Could't render image in terminal. Please use links above to view photos in browser.")
-

@@ -11,15 +11,17 @@ from console import console
 def play_birdsong(recording: Optional[sqlite3.Row]) -> None:
     if not recording:
         return
+    try:
+        response = requests.get(recording["file_url"])
+        response.raise_for_status()
 
-    response = requests.get(recording["file_url"])
-    response.raise_for_status()
+        with tempfile.NamedTemporaryFile(delete_on_close=False) as fp:
+            fp.write(response.content)
+            fp.seek(0)
+            fp.close()
+            bird_song = playsound(fp.name, block=False)
 
-    with tempfile.NamedTemporaryFile(delete_on_close=False) as fp:
-        fp.write(response.content)
-        fp.seek(0)
-        fp.close()
-        bird_song = playsound(fp.name, block=False)
-
-        if bird_song.is_alive():
-            console.print("🎶 [purple]Now playing bird song... 🐦")
+            if bird_song.is_alive():
+                console.print("🎶 [purple]Now playing bird song... 🐦")
+    except Exception:
+        console.print(f"[yellow]Listen online: [link={recording['file_url']}]{recording['file_url']}[/link]")

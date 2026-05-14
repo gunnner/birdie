@@ -49,6 +49,8 @@ def add_row_if_present(table: Table, label: str, value: Optional[str]) -> None:
 
 
 def bird_size(bird: dict) -> Optional[str]:
+    if not bird["length_min"] or bird["length_max"]:
+        return None
     return f"{bird["length_min"]} - {bird["length_max"]} cm"
 
 
