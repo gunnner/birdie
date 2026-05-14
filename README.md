@@ -1,6 +1,6 @@
 # Birdie
 
-#### Video Demo:  <URL HERE>
+#### Video Demo: [Birdie](https://youtu.be/8mfqyEqLais)
 
 #### Description
 
